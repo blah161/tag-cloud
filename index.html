@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>TAG™ Variant Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f4f4f4;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header, footer {
+      background-color: #222;
+      color: white;
+      text-align: center;
+      padding: 10px;
+    }
+
+    header a, footer a {
+      color: #66ccff;
+      margin: 0 10px;
+      text-decoration: none;
+    }
+
+    main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      max-width: 800px;
+      margin: auto;
+      background: white;
+    }
+
+    h1, h2 {
+      text-align: center;
+    }
+
+    form {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    input[type="text"] {
+      width: 300px;
+      padding: 10px;
+      font-size: 1.1em;
+    }
+
+    .button-group {
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    .button-group button {
+      padding: 10px 20px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 30px;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #eee;
+    }
+
+    .top-variant {
+      background-color: #e0ffe0;
+      font-weight: bold;
+    }
+
+    .section-divider {
+      margin-top: 40px;
+      border-top: 2px solid #ccc;
+      padding-top: 20px;
+    }
+
+    .info-line {
+      text-align: center;
+      font-size: 1em;
+      margin-bottom: 10px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>TAG™ Variant Generator</h1>
+    <nav>
+      <a href="license.html">License</a>
+      <a href="faq.html">FAQ</a>
+      <a href="eula.html">EULA</a>
+    </nav>
+  </header>
+
+  <main>
+    <p class="info-line">This tool ranks license plate variants by visual similarity, not brute-force permutations.</p>
+    <p class="info-line">You have 5 free searches per day.</p>
+
+    <form id="plate-form">
+      <input type="text" id="plate-input" placeholder="Enter license plate..." required />
+      <div class="button-group">
+        <button type="submit">Generate</button>
+      </div>
+    </form>
+
+    <section id="top-variants-section">
+      <h2>Top 10 Variants</h2>
+      <p style="text-align:center;">These are the most likely true matches based on typographical similarity.</p>
+      <table id="top-variants-table">
+        <thead><tr><th>Rank</th><th>Variant</th><th>Score</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <section id="other-variants-section" class="section-divider">
+      <h3>Remaining Variants</h3>
+      <table id="other-variants-table">
+        <thead><tr><th>Rank</th><th>Variant</th><th>Score</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <div class="button-group" id="download-link" style="display:none;">
+      ⬇️ <a href="#" id="download-url" target="_blank">Download Full List</a>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2025 AAD Systems™ | <a href="https://www.aadsystems.com" target="_blank">Visit AADSystems.com</a>
+  </footer>
+
+  <script>
+    function renderVariants(variants) {
+      const topBody = document.querySelector('#top-variants-table tbody');
+      const otherBody = document.querySelector('#other-variants-table tbody');
+      topBody.innerHTML = '';
+      otherBody.innerHTML = '';
+
+      variants.forEach((item, index) => {
+        const row = `<tr class="${index < 10 ? 'top-variant' : ''}">
+                      <td>${index + 1}</td>
+                      <td>${item[0]}</td>
+                      <td>${item[1]}</td>
+                    </tr>`;
+        if (index < 10) {
+          topBody.innerHTML += row;
+        } else {
+          otherBody.innerHTML += row;
+        }
+      });
+    }
+
+    document.getElementById('plate-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const input = document.getElementById('plate-input').value.trim();
+      if (!input) return;
+
+      const response = await fetch('/run', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plate: input })
+      });
+
+      const data = await response.json();
+      const variants = data.variants || [];
+      const filename = data.filename || null;
+
+      renderVariants(variants);
+
+      // Show download link if available
+      if (filename) {
+        const fname = filename.split('/').pop();
+        document.getElementById('download-url').href = `/variants/${fname}`;
+        document.getElementById('download-link').style.display = 'block';
+      } else {
+        document.getElementById('download-link').style.display = 'none';
+      }
+    });
+  </script>
+
+</body>
+</html>
