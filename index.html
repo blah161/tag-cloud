@@ -171,7 +171,7 @@
       const input = document.getElementById('plate-input').value.trim();
       if (!input) return;
 
-      const response = await fetch('/run', {
+      const response = await fetch('https://blah161.pythonanywhere.com/run', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ plate: input })
@@ -186,7 +186,7 @@
       // Show download link if available
       if (filename) {
         const fname = filename.split('/').pop();
-        document.getElementById('download-url').href = `/variants/${fname}`;
+        document.getElementById('download-url').href = `https://blah161.pythonanywhere.com/variants/${fname}`;
         document.getElementById('download-link').style.display = 'block';
       } else {
         document.getElementById('download-link').style.display = 'none';
